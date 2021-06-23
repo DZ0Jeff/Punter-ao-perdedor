@@ -5,10 +5,11 @@ from time import sleep
 def main():
     bot = BetsApiCrawler()
     try:
-        players = bot.select_last_match()
-        for match in players[-1:]:
-            bot.get_match(match)
-        print('> Terminado!')
+        bot.get_current_match()
+        # players = bot.select_last_match()
+        # for match in players[-1:]:
+        #     bot.get_match(match)
+        # print('> Terminado!')
 
     except Exception as erro:
         raise

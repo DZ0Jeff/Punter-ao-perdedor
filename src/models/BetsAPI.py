@@ -187,7 +187,8 @@ class BetsApiCrawler:
 
     def get_current_match(self):
         driver = self.driver
-        
+        driver.get("https://pt.betsapi.com/r/3678662/Petr-Dvorak-v-Daniel-Salomon")
+
         driver.find_element_by_link_text('Matches').click()
         remove_popup_odds(driver)
         driver.find_element_by_link_text('Matches').click()
@@ -195,25 +196,42 @@ class BetsApiCrawler:
         match_link = driver.current_url
 
         while True:
-            generate_random_time()
+            generate_random_time(30, 60)
+            driver.refresh()
             soap = self.parse_results()
 
+            print('Checando...')
             current_result = ''
             try:
-                current_result = soap.select_one('h1 a.text-danger').text
+                current_result = soap.select_one('h1 span.text-danger').text
             
             except Exception as error:
                 print(error)
-                print('Resultado não disponivel!')
+                print('Resultado ainda não disponivel! checando novamente...')
                 continue
 
-            if current_result == "0-2":
+            print(f'Resultado: {str(current_result).strip()}')
+
+            if current_result == "0-2" or current_result == "2-0":
                 print('Enviar a alarme para o usuário!')
                 print('link', match_link)
+                break
 
-            if soap.find('table').find('th', text="5"):
+            # break_search = soap.find('table').find('tr', class_="text-center").find_all('td')[-1].text
+            # print(break_search)
+
+            # if break_search != 0:
+            #     # print('Condição não achada...')
+            #     continue
+            #
+            # else:
+            #     print('Condição de quebra achada!')
+            #     break
+            results_numbers = current_result.split('-')
+            if int(results_numbers[0]) > 2 or int(results_numbers[1]) > 2:
                 print('Condição de quebra achada!')
                 break
+
 
     def parse_results(self):
         src = dynamic_page(self.driver)
