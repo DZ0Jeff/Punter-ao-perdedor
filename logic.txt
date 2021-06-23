@@ -1,0 +1,39 @@
+- jogou as 8hrs
+
+- jogar as 9hrs (A vs B)
+
+- jogar as 11hrs (A vs C)
+
+- jogar as 13hrs (A vs X)
+
+- Analisar confronto (A vs X)
+
+- histórico de jogos do dia, tanto A quanto X (A deve ter mais vitórias)
+
+- histótico de combates diretos entre A e X (A deve ter mais vitórias)
+
+- Nestes confrontos, pegar o histórico das odds dos confrontos anteriores entre A vs X
+
+- No hístorico de odds, ver a média, se estiver fora da média, enviar o alerta
+
+ msg:
+
+Bom dia Jonathan, tudo bem?
+
+Entendi, consiste em:
+
+- pegar a ultima partida que vai acontecer de jogador X, 
+
+- Analisar os jogadores X e Y da ultima partida de X, pegar o histórico de jogos do dia de ambos. (X deve ter mais vitórias)
+
+- pegar o histórico de confrontos diretos entre X e Y (X deve ter mais vitórias)
+
+- pegar o histórico de odds dos confrontos anteriores,
+
+- pegar a média de odds, se estiver fora desta mesma, enviar o alerta.
+
+Farei a análise e assim que possível te retorno.
+
+Qualquer coisa estarei a disposição.
+
+Att.
