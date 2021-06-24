@@ -1,7 +1,8 @@
 - [x] handle Authentication 
-= [ ] implement logic
+---
+ - implement logic
    - [x] get odds
    - [x] get match historic
-   - [/] loop for pages check results
-   - [ ] test match resul checker
+   - [ ] loop for pages check results
+   - [ ] test match results checker
    - [ ] bug match returns only last match

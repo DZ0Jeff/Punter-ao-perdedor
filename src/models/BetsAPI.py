@@ -1,3 +1,4 @@
+from utils.telegram import send_telegram_message
 from utils.time import generate_random_time
 from utils.setup import setSelenium
 from utils.webdriver_handler import dynamic_page, remove_popup_odds
@@ -55,11 +56,12 @@ class BetsApiCrawler:
         
         soap = self.parse_results()
         table = soap.find('table', class_="table table-sm")
-        
+
+        result = []
         for games in table.find_all("tr"): 
             links = games.find_all('a', text="View")
 
-            result = [ self.base_url + link['href'] for link in links ]
+            result = [self.base_url + link['href'] for link in links]
 
         result = remove_duplicates_on_array(result)
         return result
@@ -137,22 +139,36 @@ class BetsApiCrawler:
         print(player_details)
 
     def get_match(self, url):
+        '''
+
+        handler of upcoming matches
+
+        :param url: url of match
+        :return: void
+        '''
         driver = self.driver
         driver.get(url)
         generate_random_time()
 
-        print('> pegando dados da partida...')
+        print('> Pegando dados da partida...')
         win, lose = self.get_match_history()
 
         if win > lose:
             print('> Pegando as odds das partidas...')
             odd = self.get_odds()
             print('Odd: ', odd)
+            send_telegram_message(f'Odd: {odd}')
             
             if float(odd) <= 1.4:
                 print('Odd baixa!')
                 # proxima ver resultado das partidas, sets
                 self.get_current_match()
+
+            else:
+                print('> [INVÁLIDO] Odd alta! saindo...')
+
+        else:
+            print('> [INVÁLIDO] Derrotas maior que vitórias, saíndo...')
 
     def get_match_history(self):
         driver = self.driver
@@ -215,6 +231,7 @@ class BetsApiCrawler:
             if current_result == "0-2" or current_result == "2-0":
                 print('Enviar a alarme para o usuário!')
                 print('link', match_link)
+                send_telegram_message(f'link: {match_link}')
                 break
 
             # break_search = soap.find('table').find('tr', class_="text-center").find_all('td')[-1].text
@@ -227,11 +244,11 @@ class BetsApiCrawler:
             # else:
             #     print('Condição de quebra achada!')
             #     break
+            # send_telegram_message(current_result)
             results_numbers = current_result.split('-')
             if int(results_numbers[0]) > 2 or int(results_numbers[1]) > 2:
                 print('Condição de quebra achada!')
                 break
-
 
     def parse_results(self):
         src = dynamic_page(self.driver)
