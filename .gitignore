@@ -5,3 +5,4 @@ driver/
 .gitigonre
 *chromedriver.exe
 *session
+.idea/
