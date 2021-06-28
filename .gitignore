@@ -1,5 +1,7 @@
-/venv
+venv/
 .vscode/
 __pycache__/
 driver/
 .gitigonre
+*chromedriver.exe
+*session

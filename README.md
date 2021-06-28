@@ -1,48 +1,46 @@
-# scrapper-boilerplate
+# Punter ao perdedor
 
+Programa que verifica se existem odds baixas em partidas futuras, se existem:
 
-Scrapping tools for making easy for further scrapping
+- Verifica ate achar o placar de 2-0
+- Sinaliza no telegram
 
-provides:
-
-1 - proxy handler for ip rotation
-
-2 - automatic user-agent
-
-3 - output files (Json, Excel, Csv)
-
-4 - avoid bot detection
-
-## Instalation
+## Instalação
 ------
 
-Make sure you have python installed, [Click here to install]("https://www.python.org/")
+Tenha certeza que tenha o python instalado, [Clique aqui para instalar]("https://www.python.org/")
 
-### (Recomended) install the dependencies
+### (Recomentado) instalando o ambiente
 
 
-if you dont have virtualenv installed type:
+Se você não tiver virtualenv instalado, digite:
 
 ```python
     pip install virtualenv
 ```
 
-Then:
+Então:
 
 ```python
     python -m venv venv && .\venv\scripts\activate 
 ```
 
-if bash:
+Se for terminal:
 
 ```python
     python -m venv venv && source venv/bin/activate 
 ```
 
-Install dependêncies:
+Instalando dependêncies:
 
 ```python
     pip install -r requirements.txt
 ```
 
-is ready for use!
+Esta pronto para uso!
+
+Digite:
+
+```python
+    python main.py
+```

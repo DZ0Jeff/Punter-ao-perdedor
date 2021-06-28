@@ -3,6 +3,8 @@
  - implement logic
    - [x] get odds
    - [x] get match historic
-   - [ ] loop for pages check results
-   - [ ] test match results checker
+   - [x] loop for pages check results
+   - [x] test match results checker
    - [ ] bug match returns only last match
+   - [x] fix name of march unformatted
+   - [x] add env variables

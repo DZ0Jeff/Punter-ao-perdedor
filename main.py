@@ -1,25 +1,25 @@
 from src.models.BetsAPI import BetsApiCrawler
-from time import sleep
 
 
 def main():
     bot = BetsApiCrawler()
     try:
-        # bot.get_current_match()
-        players = bot.select_last_match()
-        for match in players[-1:]:
-            bot.get_match(match)
-        print('> Terminado!')
+        while True:
+            players = bot.select_last_match()
+            for match in players[-5:]:
+                bot.get_match(match)
+            print('> Terminado!')
 
     except Exception as erro:
         raise
         # print(erro)
 
     except KeyboardInterrupt:
-        print('Saindo..., volte sempre!')
-    
+        print('> Saindo..., volte sempre!')
+        bot.finish()
+
     finally:
-        print('Saindo...')
+        print('> Saindo...')
         bot.finish()
 
 
