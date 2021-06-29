@@ -14,7 +14,7 @@ class BetsApiCrawler:
         print('> Iniciando Robô...')
         self.driver = setSelenium(False)
         self.telegram = TelegramBot()
-        self.telegram.send_message('Iniciando Bot...')
+        # self.telegram.send_message('Iniciando Bot...')
         self.login()
         self.driver.get("https://pt.betsapi.com")
         generate_random_time()
@@ -103,7 +103,7 @@ class BetsApiCrawler:
         generate_random_time()
 
         print('> Pegando dados da partida...')
-        win, lose, title = self.get_match_history()
+        win, lose, title, guest = self.get_match_history()
 
         if win > lose:
             print('> Pegando as odds das partidas...')
@@ -114,7 +114,7 @@ class BetsApiCrawler:
             if float(odd) <= 1.4:
                 print('Odd baixa!')
                 # proxima ver resultado das partidas, sets
-                self.get_current_match(odd, title)
+                self.get_current_match(odd, title, guest)
 
             else:
                 print('> [INVÁLIDO] Odd alta! saindo...')
@@ -133,6 +133,7 @@ class BetsApiCrawler:
 
         raw_title = soap.find('h1').get_text(separator='')
         title = " ".join(raw_title.split())
+        guest = raw_title.split()[0]
 
         win = 0
         lose = 0
@@ -152,10 +153,18 @@ class BetsApiCrawler:
         print('Vitórias: ', win)
         print('Derrotas: ', lose)
 
-        return win, lose, title
+        return win, lose, title, guest
 
-    def get_current_match(self, odd, title):
+    def get_current_match(self, url, odd="0", title="0", guest="0"):
+        def get_results(win_list, result_tag, game_text):
+            if "won" in result_tag.text:
+                # and game_text in result_tag.text:
+                print(result_tag.text)
+                win_list.append(result_tag.text)
+
         driver = self.driver
+
+        driver.get(url)
 
         driver.find_element_by_link_text('Matches').click()
         remove_popup_odds(driver)
@@ -163,44 +172,38 @@ class BetsApiCrawler:
 
         match_link = driver.current_url
 
+        time = 0
+        won_list = []
+
         while True:
-            generate_random_time(30, 60)
+            # generate_random_time(30, 60)
             driver.refresh()
             soap = self.parse_results()
 
-            print('> Checando...')
-            print(match_link)
-            current_result = ''
             try:
+                # Se achar a partida iniciou!
                 current_result = soap.select_one('h1 span.text-danger').text
-            
+
             except Exception as error:
                 print(error)
-                print('Resultado ainda não disponivel! checando novamente...')
+                generate_random_time(30, 60)
                 continue
 
-            print(f'Resultado: {str(current_result).strip()}')
+            else:
 
-            if current_result == "0-2" or current_result == "2-0":
-                print('Enviar a alarme para o usuário!')
-                print('link', match_link)
-                self.telegram.send_message(f'link: {match_link}, odd: {odd}, partida: {title}')
-                break
+                results = soap.select_one("div.container div.row div.col-md-4 div.card")
+                list_results = results.find('ul', class_="list-group")
+                for result in list_results.find_all('li'):
+                    # print(result.text)
 
-            # break_search = soap.find('table').find('tr', class_="text-center").find_all('td')[-1].text
-            # print(break_search)
+                    get_results(won_list, result, "Game 1")
+                    get_results(won_list, result, "Game 1")
+                    get_results(won_list, result, "Game 1")
 
-            # if break_search != 0:
-            #     # print('Condição não achada...')
-            #     continue
-            #
-            # else:
-            #     print('Condição de quebra achada!')
-            #     break
-            # send_telegram_message(current_result)
-            results_numbers = current_result.split('-')
-            if int(results_numbers[0]) > 2 or int(results_numbers[1]) > 2:
-                print('Condição de quebra achada!')
+                print("Segundos: ", time)
+                time += 1
+
+            if time >= 50:
                 break
 
     def parse_results(self):

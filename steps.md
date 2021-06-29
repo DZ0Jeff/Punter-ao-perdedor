@@ -8,3 +8,5 @@
    - [ ] bug match returns only last match
    - [x] fix name of march unformatted
    - [x] add env variables
+   - [ ] replace logic to current match, find results table, then get all results from there and aplicate same logic
+   - [ ] stop loop if main title is display again the hours

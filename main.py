@@ -4,12 +4,12 @@ from src.models.BetsAPI import BetsApiCrawler
 def main():
     bot = BetsApiCrawler()
     try:
-        while True:
-            players = bot.select_last_match()
-            for match in players:
-                print(match)
-            print('> Terminado!')
-
+        # while True:
+        # players = bot.select_last_match()
+        # for match in players:
+        #     bot.get_match(match)
+        # print('> Terminado!')
+        bot.get_current_match("https://pt.betsapi.com/r/3706844/Borys-Kostiuk-v-Serhii-Sokolov")
 
     except Exception as erro:
         raise
