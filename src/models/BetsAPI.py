@@ -67,7 +67,7 @@ class BetsApiCrawler:
         for games in table.find_all("tr"): 
             links = games.find_all('a', text="View")
 
-            result = [self.base_url + link['href'] for link in links]
+            result += [self.base_url + link['href'] for link in links]
 
         result = remove_duplicates_on_array(result)
         return result

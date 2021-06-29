@@ -6,3 +6,4 @@ driver/
 *chromedriver.exe
 *session
 .idea/
+*.pyo

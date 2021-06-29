@@ -6,9 +6,10 @@ def main():
     try:
         while True:
             players = bot.select_last_match()
-            for match in players[-5:]:
-                bot.get_match(match)
+            for match in players:
+                print(match)
             print('> Terminado!')
+
 
     except Exception as erro:
         raise
