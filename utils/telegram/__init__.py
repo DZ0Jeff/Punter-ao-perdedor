@@ -14,8 +14,7 @@ class TelegramBot:
     - to access token, create bot in @botFather and paste the token
     """
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
-    CHAT_ID = [1593930824]
-    mybots = {}
+    CHAT_ID = [1593930824, -597357661] 
 
     def __init__(self):
         self.bot = telegram.Bot(token=self.TOKEN)

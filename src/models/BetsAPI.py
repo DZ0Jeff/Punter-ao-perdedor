@@ -16,7 +16,7 @@ class BetsApiCrawler:
         print('> Iniciando Robô...')
         self.driver = setSelenium(False)
         self.telegram = TelegramBot()
-        # self.telegram.send_message('Iniciando Bot...')
+        self.telegram.send_message('Iniciando Bot...')
         self.login()
         self.driver.get("https://pt.betsapi.com")
         self.requests += 1
@@ -60,6 +60,7 @@ class BetsApiCrawler:
 
         :return: array: results of last macthes
         """
+        print("> Selecionado partidas...")
         driver = self.driver
         driver.get(self.base_url + "/c/table-tennis")
         self.requests += 1
@@ -75,6 +76,7 @@ class BetsApiCrawler:
             result += [self.base_url + link['href'] for link in links]
 
         # result = remove_duplicates_on_array(result)
+        print('> Partidas selecionadas...')
         return result
 
     def get_odds(self):
@@ -84,10 +86,15 @@ class BetsApiCrawler:
         generate_random_time()
         remove_popup_odds(driver)
 
-        driver.find_element_by_link_text('Odds').click()
-        generate_random_time()
-        remove_popup_odds(driver)
-        driver.find_element_by_link_text('Odds').click()
+        try:
+            driver.find_element_by_link_text('Odds').click()
+            generate_random_time()
+            remove_popup_odds(driver)
+            driver.find_element_by_link_text('Odds').click()
+        
+        except Exception as error:
+            print(f"> Um erro aconteceu... {error}")
+            return
 
         soap = self.parse_results()
         table = soap.find('table')
@@ -132,10 +139,16 @@ class BetsApiCrawler:
     def get_match_history(self):
         driver = self.driver
 
-        driver.find_element_by_link_text('História').click()
-        remove_popup_odds(driver)
-        sleep(3)
-        driver.find_element_by_link_text('História').click()
+        try:
+            driver.find_element_by_link_text('História').click()
+            # print(driver.current_url)
+            remove_popup_odds(driver)
+            # print(driver.current_url)
+            driver.find_element_by_link_text('História').click()
+
+        except Exception as error:
+            print(f"> Um erro aconteceu... {error}")
+            return
 
         soap = self.parse_results()
 
@@ -158,20 +171,26 @@ class BetsApiCrawler:
                 for _ in column.find_all('td', class_="badge_L"):
                     lose += 1
 
-        print('Vitórias: ', win)
-        print('Derrotas: ', lose)
+        print('> Vitórias: ', win)
+        print('> Derrotas: ', lose)
 
         return win, lose, title, guest
 
     def get_current_match(self, odd, title, guest):
         driver = self.driver
 
-        driver.find_element_by_link_text('Matches').click()
-        remove_popup_odds(driver)
-        driver.find_element_by_link_text('Matches').click()
+        try:
+            driver.find_element_by_link_text('Matches').click()
+            remove_popup_odds(driver)
+            driver.find_element_by_link_text('Matches').click()
+        
+        except Exception as error:
+            print(f'> Um erro aconteceu...{error}')
+            return
 
         match_link = driver.current_url
 
+        guest_lost = False
         while True:
             driver.refresh()
             soap = self.parse_results()
@@ -179,18 +198,22 @@ class BetsApiCrawler:
             try:
                 # Se achar a partida iniciou!
                 current_result = soap.select_one('h1 span.text-danger').text
-
-            except Exception as error:
-                print('> Resultados ainda não disponíveis, aguarde...')
-                print(error)
-                generate_random_time(30, 60)
-                continue
-
-            else:
-                # seleciona o quadro de resultados
                 results = soap.select_one("div.container div.row div.col-md-4 div.card")
                 list_results = results.find('ul', class_="list-group")
 
+            except AttributeError:
+                print('> Resultados ainda não disponíveis, aguarde...')
+                # print(error)
+                generate_random_time(60, 60)
+                continue
+
+            else:
+                # Sair se a partida cancelada
+                if current_result == "Cancelled":
+                    print('Partida cancelada!')
+                    break
+
+                # seleciona o quadro de resultados
                 match_list = []
                 for result in list_results.find_all('li'):
                     # extrai as vitórias e as salvam para futuras manipulações
@@ -216,15 +239,18 @@ class BetsApiCrawler:
                 if placar == "2 - 0":
                     print('Enviar a alarme para o usuário!')
                     print('link', match_link)
-                    self.telegram.send_message(f'partida: {title}\nplacar {current_result}\nlink: {match_link}\nodd: {odd}')
+                    self.telegram.send_message(f'partida: {title}\nplacar {placar}\nlink: {match_link}\nodd: {odd}')
                     break
 
-                if placar == "0 - 1":
-                    self.telegram.send_message(f"casa {guest} perdendo de {current_result} \nPartida {match_link}")
+                if placar == "0 - 1" and not guest_lost:
+                    self.telegram.send_message(f"casa {guest} perdendo de {placar} \nPartida {match_link}")
+                    guest_lost = True
 
                 # se for realizada 3 partidas, o jogo se encerra
-                if len(match_list) > 3:
+                if len(match_list) >= 3:
                     break
+
+                generate_random_time(30, 60)
 
     def parse_results(self):
         src = dynamic_page(self.driver)
