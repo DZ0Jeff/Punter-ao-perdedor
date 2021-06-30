@@ -9,7 +9,7 @@ def main():
             for match in players:
                 bot.get_match(match)
             print('> Terminado!')
-            bot.get_current_match("https://pt.betsapi.com/r/3706844/Borys-Kostiuk-v-Serhii-Sokolov")
+            # bot.get_current_match("https://pt.betsapi.com/r/3706844/Borys-Kostiuk-v-Serhii-Sokolov")
 
     except Exception as erro:
         raise

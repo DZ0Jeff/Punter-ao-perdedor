@@ -1,3 +1,4 @@
+from time import sleep
 from utils.telegram import TelegramBot
 from utils.time import generate_random_time
 from utils.setup import setSelenium
@@ -9,6 +10,7 @@ from selenium.common.exceptions import NoSuchElementException
 
 class BetsApiCrawler:
     base_url = "https://pt.betsapi.com"
+    requests = 0
 
     def __init__(self) -> None:
         print('> Iniciando Robô...')
@@ -17,6 +19,7 @@ class BetsApiCrawler:
         # self.telegram.send_message('Iniciando Bot...')
         self.login()
         self.driver.get("https://pt.betsapi.com")
+        self.requests += 1
         generate_random_time()
 
     def login(self):
@@ -59,6 +62,8 @@ class BetsApiCrawler:
         """
         driver = self.driver
         driver.get(self.base_url + "/c/table-tennis")
+        self.requests += 1
+        self.restart(self.base_url + "/c/table-tennis")
         
         soap = self.parse_results()
         table = soap.find('table', class_="table table-sm")
@@ -69,7 +74,7 @@ class BetsApiCrawler:
 
             result += [self.base_url + link['href'] for link in links]
 
-        result = remove_duplicates_on_array(result)
+        # result = remove_duplicates_on_array(result)
         return result
 
     def get_odds(self):
@@ -100,6 +105,8 @@ class BetsApiCrawler:
         '''
         driver = self.driver
         driver.get(url)
+        self.requests += 1
+        self.restart(url)
         generate_random_time()
 
         print('> Pegando dados da partida...')
@@ -127,6 +134,7 @@ class BetsApiCrawler:
 
         driver.find_element_by_link_text('História').click()
         remove_popup_odds(driver)
+        sleep(3)
         driver.find_element_by_link_text('História').click()
 
         soap = self.parse_results()
@@ -224,3 +232,9 @@ class BetsApiCrawler:
 
     def finish(self):
         self.driver.quit()
+
+    def restart(self, url):
+        if self.requests % 250 == 0:
+            self.finish()
+            self.driver = setSelenium(False)
+            self.driver.get(url)

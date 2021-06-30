@@ -10,8 +10,6 @@ def switch_ad_installation_popup(driver):
 def remove_popup_odds(driver):
     ad_url = driver.current_url.split('#')
 
-    # print(ad_url)
-
     if ad_url[-1] == "google_vignette":
         print('> Anúncio detectado! a tentar tirar-lo')
         ad_url.pop()
