@@ -120,7 +120,7 @@ class BetsApiCrawler:
                 print('> [INVÁLIDO] Odd alta! saindo...')
 
         else:
-            print('> [INVÁLIDO] Derrotas maior que vitórias ou iguais, saíndo...')
+            print('> [INVÁLIDO] Derrotas maior e/ou iguais que vitórias, saíndo...')
 
     def get_match_history(self):
         driver = self.driver
@@ -155,16 +155,8 @@ class BetsApiCrawler:
 
         return win, lose, title, guest
 
-    def get_current_match(self, url, odd="0", title="0", guest="0"):
-        def get_results(win_list, result_tag, game_text):
-            if "won" in result_tag.text:
-                # and game_text in result_tag.text:
-                print(result_tag.text)
-                win_list.append(result_tag.text)
-
+    def get_current_match(self, odd, title, guest):
         driver = self.driver
-
-        driver.get(url)
 
         driver.find_element_by_link_text('Matches').click()
         remove_popup_odds(driver)
@@ -172,11 +164,7 @@ class BetsApiCrawler:
 
         match_link = driver.current_url
 
-        time = 0
-        won_list = []
-
         while True:
-            # generate_random_time(30, 60)
             driver.refresh()
             soap = self.parse_results()
 
@@ -185,26 +173,50 @@ class BetsApiCrawler:
                 current_result = soap.select_one('h1 span.text-danger').text
 
             except Exception as error:
+                print('> Resultados ainda não disponíveis, aguarde...')
                 print(error)
                 generate_random_time(30, 60)
                 continue
 
             else:
-
+                # seleciona o quadro de resultados
                 results = soap.select_one("div.container div.row div.col-md-4 div.card")
                 list_results = results.find('ul', class_="list-group")
+
+                match_list = []
                 for result in list_results.find_all('li'):
-                    # print(result.text)
+                    # extrai as vitórias e as salvam para futuras manipulações
+                    if "won" in result.text:
+                        print(result.text)
+                        match_list.append(result.text)
 
-                    get_results(won_list, result, "Game 1")
-                    get_results(won_list, result, "Game 1")
-                    get_results(won_list, result, "Game 1")
+                win = 0
+                lose = 0
 
-                print("Segundos: ", time)
-                time += 1
+                for wins in match_list:
+                    if f"{guest}" in wins:
+                        win += 1
 
-            if time >= 50:
-                break
+                    if not f"{guest}" in wins:
+                        lose += 1
+                
+                placar = f"{win} - {lose}"
+
+                print(f"Placar: {placar}")
+
+                # enviar mensagem ao usuário se o placar estiver em 2-0
+                if placar == "2 - 0":
+                    print('Enviar a alarme para o usuário!')
+                    print('link', match_link)
+                    self.telegram.send_message(f'partida: {title}\nplacar {current_result}\nlink: {match_link}\nodd: {odd}')
+                    break
+
+                if placar == "0 - 1":
+                    self.telegram.send_message(f"casa {guest} perdendo de {current_result} \nPartida {match_link}")
+
+                # se for realizada 3 partidas, o jogo se encerra
+                if len(match_list) > 3:
+                    break
 
     def parse_results(self):
         src = dynamic_page(self.driver)
