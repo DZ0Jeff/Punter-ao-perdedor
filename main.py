@@ -5,7 +5,6 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
-    print(ROOT_DIR)
     bot = BetsApiCrawler(ROOT_DIR)
     try:
         while True:

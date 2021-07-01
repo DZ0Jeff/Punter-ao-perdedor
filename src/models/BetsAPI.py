@@ -16,8 +16,8 @@ class BetsApiCrawler:
         print('> Iniciando Robô...')
         self.ROOT_PATH = root_path
         self.driver = setSelenium(self.ROOT_PATH, False)
-        self.telegram = TelegramBot()
-        self.telegram.send_message('Iniciando Bot...')
+        self.telegram = TelegramBot(root_path)
+        self.telegram.send_message('Iniciando Punter ao perdedor...')
         self.login()
         self.driver.get("https://pt.betsapi.com")
         self.requests += 1
