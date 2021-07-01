@@ -56,3 +56,8 @@ def save_to_html(data):
 def dataToExcel(dataDict, filename):
     df = pd.DataFrame(dataDict)
     df.to_csv(filename, mode="a", index=False, header=not os.path.exists(filename))
+
+
+def save_error(error):
+    with open('debug.log', 'a') as file:
+        file.write(f"{error}\n")

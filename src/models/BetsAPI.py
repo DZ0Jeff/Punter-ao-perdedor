@@ -1,9 +1,11 @@
+from os import replace
 from time import sleep
 from utils.telegram import TelegramBot
 from utils.time import generate_random_time
 from utils.setup import setSelenium
 from utils.webdriver_handler import dynamic_page, remove_popup_odds
-from utils.parser_handler import init_parser, remove_duplicates_on_array
+from utils.parser_handler import init_parser, remove_duplicates_on_array, remove_whitespaces
+from utils.file_handler import save_error
 from src.secrets import user, password
 from selenium.common.exceptions import NoSuchElementException
 
@@ -121,8 +123,9 @@ class BetsApiCrawler:
         try:
             win, lose, title, guest = self.get_match_history()
 
-        except Exception:
-            print('> Erro ao localizar resultados..., Saindo!')
+        except Exception as error:
+            save_error(error)
+            print('> Erro ao localizar resultados...')
             return
 
         if win > lose:
@@ -153,19 +156,25 @@ class BetsApiCrawler:
             driver.find_element_by_link_text('História').click()
 
         except Exception as error:
+            save_error(error)
             print(f"> Um erro aconteceu... {error}")
             return
 
         soap = self.parse_results()
 
-        raw_title = soap.find('h1').get_text(separator='')
-        title = " ".join(raw_title.split())
-        guest = raw_title.split()[0]
+        raw_title = soap.select('h1 a')
+        # print(raw_title)
+
+        temp_title = [ title.get_text(separator='') for title in raw_title ]
+
+        title = ' '.join(temp_title)
+        guest = raw_title[0].get_text(separator='')
+        full_title = remove_whitespaces(soap.find('h1').get_text(separator=''))
 
         win = 0
         lose = 0
 
-        print(title)
+        print('Titulo: ', full_title)
 
         table = soap.find_all('table', class_="table table-sm")
         for item in table:
@@ -194,7 +203,11 @@ class BetsApiCrawler:
             print(f'> Um erro aconteceu...{error}')
             return
 
-        match_link = driver.current_url
+        # match_link = driver.current_url
+
+        match_link = title.replace(" ", "%20")
+
+        bet365_link = f"https://www.bet365.com/#/AX/K^{match_link}"
 
         guest_lost = False
         while True:
@@ -244,16 +257,16 @@ class BetsApiCrawler:
                 # enviar mensagem ao usuário se o placar estiver em 2-0
                 if placar == "2 - 0":
                     print('Enviar a alarme para o usuário!')
-                    print('link', match_link)
-                    self.telegram.send_message(f'partida: {title}\nplacar {placar}\nlink: {match_link}\nodd: {odd}')
+                    print('link', bet365_link)
+                    self.telegram.send_message(f'Favorito {guest} ganhando!\nplacar {placar}\nlink: {bet365_link}\nodd: {odd}')
                     break
 
                 if placar == "0 - 1" and not guest_lost:
-                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} \nPartida {match_link}\nodd: {odd}")
+                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} \nPartida: {bet365_link}\nodd: {odd}")
                     guest_lost = True
 
                 if placar == "0 - 2" and not guest_lost:
-                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} seguidas \nPartida {match_link}\nodd: {odd}")
+                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} seguidas \nPartida: {bet365_link}\nodd: {odd}")
                     guest_lost = True
 
                 # se for realizada 3 partidas, o jogo se encerra

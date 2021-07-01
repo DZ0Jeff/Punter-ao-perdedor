@@ -40,3 +40,7 @@ def init_parser(html):
 def remove_duplicates_on_array(array):
     my_final_list = set(array)
     return list(my_final_list)
+
+
+def remove_whitespaces(data):
+    " ".join(data.split())
