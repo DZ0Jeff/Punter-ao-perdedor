@@ -12,9 +12,10 @@ class BetsApiCrawler:
     base_url = "https://pt.betsapi.com"
     requests = 0
 
-    def __init__(self) -> None:
+    def __init__(self, root_path) -> None:
         print('> Iniciando Robô...')
-        self.driver = setSelenium(False)
+        self.ROOT_PATH = root_path
+        self.driver = setSelenium(self.ROOT_PATH, False)
         self.telegram = TelegramBot()
         self.telegram.send_message('Iniciando Bot...')
         self.login()
@@ -117,7 +118,12 @@ class BetsApiCrawler:
         generate_random_time()
 
         print('> Pegando dados da partida...')
-        win, lose, title, guest = self.get_match_history()
+        try:
+            win, lose, title, guest = self.get_match_history()
+
+        except Exception:
+            print('> Erro ao localizar resultados..., Saindo!')
+            return
 
         if win > lose:
             print('> Pegando as odds das partidas...')
@@ -243,7 +249,11 @@ class BetsApiCrawler:
                     break
 
                 if placar == "0 - 1" and not guest_lost:
-                    self.telegram.send_message(f"casa {guest} perdendo de {placar} \nPartida {match_link}")
+                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} \nPartida {match_link}\nodd: {odd}")
+                    guest_lost = True
+
+                if placar == "0 - 2" and not guest_lost:
+                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} seguidas \nPartida {match_link}\nodd: {odd}")
                     guest_lost = True
 
                 # se for realizada 3 partidas, o jogo se encerra
@@ -262,5 +272,5 @@ class BetsApiCrawler:
     def restart(self, url):
         if self.requests % 250 == 0:
             self.finish()
-            self.driver = setSelenium(False)
+            self.driver = setSelenium(self.ROOT_PATH, False)
             self.driver.get(url)

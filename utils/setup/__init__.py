@@ -5,10 +5,10 @@ from selenium.webdriver.chrome.options import Options
 from fake_useragent import UserAgent
 from utils.build import resource_path
 from utils.proxy import init_proxy
-from utils.paths.chromedriver_path import path
+# from utils.paths.chromedriver_path import path
 
 
-def setSelenium(console=True, proxy=False):
+def setSelenium(root_path, console=True, proxy=False):
     # configuração do selenium
     chrome_options = Options()
     ua = UserAgent()
@@ -42,6 +42,8 @@ def setSelenium(console=True, proxy=False):
     chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
     prefs = {"profile.default_content_setting_values.notifications": 2}
     chrome_options.add_experimental_option("prefs", prefs)
+
+    path = resource_path(f"{root_path}\chromedriver.exe")
 
     if proxy:
         PROXY = init_proxy(path)

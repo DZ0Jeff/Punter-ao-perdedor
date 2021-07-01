@@ -14,14 +14,14 @@ class TelegramBot:
     - to access token, create bot in @botFather and paste the token
     """
     TOKEN = os.environ.get("TELEGRAM_TOKEN")
-    CHAT_ID = [1593930824, -597357661] 
+    CHAT_ID = [749468787] #-100597357661 1593930824 
 
     def __init__(self):
         self.bot = telegram.Bot(token=self.TOKEN)
 
     def send_message(self, msg):
         try:
-            print('Enviando mensagem...')
+            print('> Enviando mensagem...')
             for chat in self.CHAT_ID:
                 self.bot.sendMessage(chat_id=chat, text=msg)
 
@@ -29,4 +29,4 @@ class TelegramBot:
             print(f'> [ERRO] ao enviar mensagem! {error} ')
 
         else:
-            print('Mensagem enviada com sucesso!')
+            print('> Mensagem enviada com sucesso!')
