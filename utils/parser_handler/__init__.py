@@ -43,4 +43,4 @@ def remove_duplicates_on_array(array):
 
 
 def remove_whitespaces(data):
-    " ".join(data.split())
+    return " ".join(data.split())

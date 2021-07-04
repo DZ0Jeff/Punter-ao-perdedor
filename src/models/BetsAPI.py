@@ -4,7 +4,7 @@ from utils.telegram import TelegramBot
 from utils.time import generate_random_time
 from utils.setup import setSelenium
 from utils.webdriver_handler import dynamic_page, remove_popup_odds
-from utils.parser_handler import init_parser, remove_duplicates_on_array, remove_whitespaces
+from utils.parser_handler import init_parser, remove_whitespaces
 from utils.file_handler import save_error
 from src.secrets import user, password
 from selenium.common.exceptions import NoSuchElementException
@@ -13,6 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 class BetsApiCrawler:
     base_url = "https://pt.betsapi.com"
     requests = 0
+    bet365_base = f"https://www.bet365.com/#/AX/K^"
 
     def __init__(self, root_path) -> None:
         print('> Iniciando Robô...')
@@ -134,9 +135,10 @@ class BetsApiCrawler:
             print('Odd: ', odd)
             # self.telegram.send_message(f'Odd: {odd}')
             
-            if float(odd) <= 1.4:
-                print('Odd baixa!')
+            if float(odd) <= 1.5:
                 # proxima ver resultado das partidas, sets
+                match_link = title.replace(" ", "%20")
+                self.telegram.send_message(f'Odd baixa!\nOdd: {odd}\nPartida: {self.bet365_base + match_link}')
                 self.get_current_match(odd, title, guest)
 
             else:
@@ -169,12 +171,12 @@ class BetsApiCrawler:
 
         title = ' '.join(temp_title)
         guest = raw_title[0].get_text(separator='')
-        full_title = remove_whitespaces(soap.find('h1').get_text(separator=''))
+        full_title = soap.find('h1').get_text(separator='')
 
         win = 0
         lose = 0
 
-        print('Titulo: ', full_title)
+        print('Titulo: ', remove_whitespaces(full_title))
 
         table = soap.find_all('table', class_="table table-sm")
         for item in table:
@@ -207,9 +209,14 @@ class BetsApiCrawler:
 
         match_link = title.replace(" ", "%20")
 
-        bet365_link = f"https://www.bet365.com/#/AX/K^{match_link}"
+        bet365_link = self.bet365_base + match_link
 
+        # print displar variables, to avoid to print every loop
         guest_lost = False
+        waiting_match = False
+        temp_placar = ''
+        game_status = ''
+
         while True:
             driver.refresh()
             soap = self.parse_results()
@@ -221,7 +228,9 @@ class BetsApiCrawler:
                 list_results = results.find('ul', class_="list-group")
 
             except AttributeError:
-                print('> Resultados ainda não disponíveis, aguarde...')
+                if not waiting_match:
+                    print('> Resultados ainda não disponíveis, aguarde...')
+                    waiting_match = True
                 # print(error)
                 generate_random_time(60, 60)
                 continue
@@ -237,7 +246,10 @@ class BetsApiCrawler:
                 for result in list_results.find_all('li'):
                     # extrai as vitórias e as salvam para futuras manipulações
                     if "won" in result.text:
-                        print(result.text)
+                        if result.text != game_status:
+                            print(result.text)
+                            game_status = result.text
+
                         match_list.append(result.text)
 
                 win = 0
@@ -252,22 +264,25 @@ class BetsApiCrawler:
                 
                 placar = f"{win} - {lose}"
 
-                print(f"Placar: {placar}")
+                if placar != temp_placar:
+                    print(f"Placar: {placar}")
+                    temp_placar = placar
 
                 # enviar mensagem ao usuário se o placar estiver em 2-0
-                if placar == "2 - 0":
-                    print('Enviar a alarme para o usuário!')
-                    print('link', bet365_link)
-                    self.telegram.send_message(f'Favorito {guest} ganhando!\nplacar {placar}\nlink: {bet365_link}\nodd: {odd}')
-                    break
+                # if placar == "2 - 0":
+                #     print('Enviar a alarme para o usuário!')
+                #     print('link', bet365_link)
+                #     self.telegram.send_message(f'Favorito {guest} ganhando!\nplacar {placar}\nlink: {bet365_link}\nodd: {odd}')
+                #     break
 
                 if placar == "0 - 1" and not guest_lost:
                     self.telegram.send_message(f"Favorito {guest} perdendo de {placar} \nPartida: {bet365_link}\nodd: {odd}")
                     guest_lost = True
 
-                if placar == "0 - 2" and not guest_lost:
-                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar} seguidas \nPartida: {bet365_link}\nodd: {odd}")
-                    guest_lost = True
+                if placar == "0 - 2":
+                    print('Enviar notificação para o usuário!')
+                    self.telegram.send_message(f"Favorito {guest} perdendo de {placar}! \nPartida: {bet365_link}\nodd: {odd}")
+                    break
 
                 # se for realizada 3 partidas, o jogo se encerra
                 if len(match_list) >= 3:
