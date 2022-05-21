@@ -137,8 +137,8 @@ class BetsApiCrawler:
             
             if float(odd) <= 1.5:
                 # proxima ver resultado das partidas, sets
-                match_link = title.replace(" ", "%20")
-                self.telegram.send_message(f'Odd baixa!\nOdd: {odd}\nPartida: {self.bet365_base + match_link}')
+                # match_link = title.replace(" ", "%20")
+                # self.telegram.send_message(f'Odd baixa!\nOdd: {odd}\nPartida: {self.bet365_base + match_link}')
                 self.get_current_match(odd, title, guest)
 
             else:
@@ -216,6 +216,7 @@ class BetsApiCrawler:
         waiting_match = False
         temp_placar = ''
         game_status = ''
+        timeout = 0
 
         while True:
             driver.refresh()
@@ -228,11 +229,17 @@ class BetsApiCrawler:
                 list_results = results.find('ul', class_="list-group")
 
             except AttributeError:
+                if timeout >= 3600:
+                    print('> partida travada, saindo!')
+                    break
+
                 if not waiting_match:
                     print('> Resultados ainda não disponíveis, aguarde...')
                     waiting_match = True
                 # print(error)
                 generate_random_time(60, 60)
+
+                timeout += 1
                 continue
 
             else:
@@ -248,7 +255,7 @@ class BetsApiCrawler:
                     if "won" in result.text:
                         if result.text != game_status:
                             print(result.text)
-                            game_status = result.text
+                            game_status += result.text
 
                         match_list.append(result.text)
 
