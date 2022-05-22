@@ -6,6 +6,7 @@ from fake_useragent import UserAgent
 from utils.build import resource_path
 from utils.proxy import init_proxy
 # from utils.paths.chromedriver_path import path
+from webdriver_manager import ChromeDriverManager
 
 
 def setSelenium(root_path, console=True, proxy=False):
@@ -43,7 +44,7 @@ def setSelenium(root_path, console=True, proxy=False):
     prefs = {"profile.default_content_setting_values.notifications": 2}
     chrome_options.add_experimental_option("prefs", prefs)
 
-    path = resource_path(f"{root_path}\chromedriver.exe")
+    path = ChromeDriverManager().install() or resource_path(f"{root_path}\chromedriver.exe")
 
     if proxy:
         PROXY = init_proxy(path)
