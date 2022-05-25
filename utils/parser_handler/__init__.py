@@ -5,6 +5,7 @@ from fake_useragent import UserAgent
 from utils.proxy import init_proxy
 from utils.paths.chromedriver_path import path
 
+
 def init_crawler(url, proxy=False):
     try:
         ua = UserAgent()
@@ -44,3 +45,7 @@ def remove_duplicates_on_array(array):
 
 def remove_whitespaces(data):
     return " ".join(data.split())
+
+
+def has_numbers(inputString):
+    return any(char.strip().isdigit() for char in inputString)

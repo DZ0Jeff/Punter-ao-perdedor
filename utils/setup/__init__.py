@@ -6,7 +6,7 @@ from fake_useragent import UserAgent
 from utils.build import resource_path
 from utils.proxy import init_proxy
 # from utils.paths.chromedriver_path import path
-from webdriver_manager import ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 def setSelenium(root_path, console=True, proxy=False):

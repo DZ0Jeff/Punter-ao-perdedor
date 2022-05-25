@@ -17,7 +17,7 @@ class TelegramBot:
         load_dotenv(os.path.join(root_path, '.env'), verbose=True)
         self.TOKEN = os.environ.get("TELEGRAM_TOKEN")
         self.bot = telegram.Bot(token=self.TOKEN)
-        self.CHAT_ID = [1593930824, 749468787] #-100597357661 1593930824 749468787
+        self.CHAT_ID = [os.environ.get('TELEGRAM_CHAT_ID')] #-100597357661 1593930824 749468787
 
     def send_message(self, msg):
         try:

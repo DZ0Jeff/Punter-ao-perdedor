@@ -5,7 +5,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
-    bot = BetsApiCrawler(ROOT_DIR)
+    bot = BetsApiCrawler(ROOT_DIR, display_browser=True)
     try:
         while True:
             players = bot.select_last_match()
@@ -14,6 +14,7 @@ def main():
             print('> Terminado!')
 
     except Exception as erro:
+        bot.finish()
         raise
         # print(erro)
 

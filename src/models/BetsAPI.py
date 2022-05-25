@@ -15,10 +15,10 @@ class BetsApiCrawler:
     requests = 0
     bet365_base = f"https://www.bet365.com/#/AX/K^"
 
-    def __init__(self, root_path) -> None:
+    def __init__(self, root_path, display_browser=False) -> None:
         print('> Iniciando Robô...')
         self.ROOT_PATH = root_path
-        self.driver = setSelenium(self.ROOT_PATH, False)
+        self.driver = setSelenium(self.ROOT_PATH, display_browser)
         self.telegram = TelegramBot(root_path)
         self.telegram.send_message('Iniciando Punter ao perdedor...')
         self.login()

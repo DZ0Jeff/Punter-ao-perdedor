@@ -27,13 +27,18 @@ Se você não tiver virtualenv instalado, digite:
 ## Instalação
 ------
 
-Faça a cricação do bot do telegram digitando @botmaster
+Faça a criação do bot do telegram digitando @botmaster
 
 com o token de acesso, crie um arquivo ".env" com o seguinte conteudo:
 
 ``` env
 TELEGRAM_TOKEN="Telegram token"
+TELEGRAM_CHAT_ID="seu telegram id"
 ```
+
+#### telegram chat id
+
+para conseguir o mesmo, acesse o telegram e clique em "Meu chat", depois clique em "Chat" e depois "ID do chat" ou digite @getidsbot para colocar o id do chat
 
 (aqui no diretório possui um arquivo ".env.example" com o exemplo)
 
@@ -64,6 +69,6 @@ Digite:
 ```
 
 
-## MAis informações
+## Maiss informações
 
 consulte ao diretório "docs" para mais informações
