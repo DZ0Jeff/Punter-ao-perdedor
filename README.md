@@ -1,6 +1,6 @@
 # Punter ao perdedor
 
-Programa que verifica se existem odds baixas em partidas futuras, se existem:
+Programa que verifica se existem odds baixas em partidas futuras de tênis de mesa, se existem:
 
 - Verifica ate achar o placar de 2-0
 - Sinaliza no telegram
